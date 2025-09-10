@@ -1,96 +1,384 @@
-# 🔐 PKI Service – Infrastructure de Gestion de Clés (Documentation complète)
+# 🔐 PKI Service – Infrastructure Complète de Gestion de Clés Cryptographiques
 
 ## 🌟 Aperçu du Projet
 
-Le **PKI Service** est un microservice basé sur **FastAPI** qui fournit une infrastructure sécurisée pour la **génération**, le **stockage chiffré**, la **révocation**, la **rotation** et la **consultation** de paires de clés cryptographiques. Il constitue la fondation de confiance de l’écosystème, consommé par les services de signature, stéganographie et vérification.
+Le **PKI Service** est un microservice critique basé sur **FastAPI** qui constitue le cœur de l'infrastructure cryptographique de l'écosystème. Il fournit une plateforme sécurisée, scalable et robuste pour la **génération**, le **stockage chiffré**, la **révocation**, la **rotation** et la **consultation** de paires de clés cryptographiques. 
+
+Ce service est la **fondation de confiance** de l'architecture, consommé par les services de signature, stéganographie et vérification pour garantir l'intégrité, l'authenticité et la non-répudiation des opérations cryptographiques.
 
 ### 🎯 Fonctionnalités Clés
-- **Génération de clés** 🔑: RSA (1024–8192), ECDSA (P-256, P-384, P-521), Ed25519.
-- **Stockage sécurisé** 🛡️: Clé privée chiffrée via Fernet (hex), clé publique en PEM.
-- **Cycle de vie** 🔄: Expiration, révocation (avec raison), rotation (ancienne révoquée + nouvelle créée).
-- **Validation** ✅: Vérifications PEM/tailles/courbes; empreintes; scénarios nominaux/cas alternatifs gérés.
-- **Statistiques** 📊: Totaux, statut (actives, révoquées, expirées), répartition par type.
-- **Observabilité** 👀: Endpoints `/health`, `/ready`, `/metrics` (Prometheus-like).
-- **Sécurité Web** 🔒: JWT, CORS, TrustedHost, HTTPS, logs structurés, `x-trace-id`.
+
+#### 🔑 Génération de Clés Cryptographiques
+- **RSA** : Tailles supportées 1024, 2048, 3072, 4096, 8192 bits
+- **ECDSA** : Courbes P-256, P-384, P-521 (NIST)
+- **Ed25519** : Signature elliptique moderne et performante
+- **Validation automatique** : Vérification des paramètres et formats
+- **Génération par lot** : Création de multiples paires de clés
+
+#### 🛡️ Stockage Sécurisé
+- **Chiffrement Fernet** : Clés privées chiffrées avec clé symétrique
+- **Format PEM** : Clés publiques en format standard
+- **Encodage hexadécimal** : Stockage sécurisé des clés chiffrées
+- **Métadonnées enrichies** : Informations de création, utilisation, rotation
+
+#### 🔄 Gestion du Cycle de Vie
+- **Expiration automatique** : Durée de vie configurable (1-365 jours)
+- **Révocation sécurisée** : Désactivation avec raison documentée
+- **Rotation intelligente** : Remplacement automatique avec préservation des métadonnées
+- **Audit trail** : Traçabilité complète des opérations
+
+#### ✅ Validation et Vérification
+- **Validation PEM** : Vérification de la structure des clés
+- **Contrôles de taille** : Validation des paramètres cryptographiques
+- **Empreintes digitales** : Génération d'identifiants uniques
+- **Tests d'intégrité** : Vérification de la cohérence des paires
+
+#### 📊 Statistiques et Monitoring
+- **Métriques détaillées** : Totaux, répartition par type, statuts
+- **Alertes d'expiration** : Notifications proactives
+- **Tableaux de bord** : Visualisation des tendances
+- **Rapports d'audit** : Historique des opérations
+
+#### 👀 Observabilité Avancée
+- **Endpoints de santé** : `/health`, `/ready`, `/metrics`
+- **Métriques Prometheus** : Intégration avec systèmes de monitoring
+- **Logs structurés** : Traçabilité avec `x-trace-id`
+- **Monitoring en temps réel** : Surveillance des performances
+
+#### 🔒 Sécurité Web
+- **Authentification JWT** : Tokens sécurisés avec expiration
+- **Autorisation par rôles** : Contrôle d'accès granulaire
+- **CORS configuré** : Protection contre les attaques cross-origin
+- **TrustedHost** : Validation des hôtes autorisés
+- **HTTPS obligatoire** : Chiffrement des communications
 
 ---
 
-## 🏗️ Architecture
+## 🏗️ Architecture Détaillée
 
-Le service suit une architecture **modulaire, orientée services** avec opérations asynchrones et migrations de schéma.
+Le PKI Service suit une architecture **modulaire, orientée services** avec opérations asynchrones, migrations de schéma et observabilité intégrée.
 
-- **FastAPI** 🌐: Serveur HTTP performant et asynchrone.
-- **SQLAlchemy 2 (async)** 🗄️ + **Alembic**: Modélisation et migrations DB.
-- **PostgreSQL** 🐘: Stockage persistant des clés et états.
-- **cryptography** 🔐: Génération et validation des clés (RSA/ECDSA/Ed25519).
-- **Fernet** 🧩: Chiffrement de la clé privée.
-- **JWT** 🔑: AuthN/AuthZ (rôle admin pour actions sensibles).
-- **Celery + Redis (optionnel)** 🧵: Tâches asynchrones planifiées.
+### 🏛️ Stack Technologique
 
-### 📂 Arborescence Simplifiée
+#### 🌐 Couche Application
+- **FastAPI** : Framework web moderne et performant avec support asynchrone natif
+- **Pydantic** : Validation stricte des données d'entrée et de sortie
+- **Uvicorn** : Serveur ASGI haute performance pour le déploiement
+
+#### 🗄️ Couche Données
+- **SQLAlchemy 2.0** : ORM asynchrone avec support des pools de connexions
+- **Alembic** : Système de migrations de base de données versionné
+- **PostgreSQL** : Base de données relationnelle robuste et performante
+- **asyncpg** : Driver PostgreSQL asynchrone optimisé
+
+#### 🔐 Couche Cryptographique
+- **cryptography** : Bibliothèque de référence pour les opérations cryptographiques
+- **Fernet** : Chiffrement symétrique AES 128 pour les clés privées
+- **JWT** : Tokens d'authentification sécurisés avec expiration
+
+#### 🧵 Couche Asynchrone
+- **Celery** : Système de tâches asynchrones distribuées
+- **Redis** : Broker et backend pour Celery (optionnel)
+- **asyncio** : Support natif des opérations asynchrones
+
+#### 📊 Couche Observabilité
+- **Prometheus** : Collecte et stockage des métriques
+- **Structured Logging** : Logs JSON avec corrélation des traces
+- **Health Checks** : Endpoints de surveillance de la santé
+
+### 📂 Architecture des Fichiers
+
 ```
 pki-service/
-├── app/
-│   ├── main.py            # FastAPI app, middlewares, santé/metrics
-│   ├── settings.py        # Config .env validée (DB/Redis/JWT/Fernet/CORS)
-│   ├── database.py        # Moteur async, sessions, transactions, diagnostics
-│   ├── models.py          # Modèle SQLAlchemy (KeyPair)
-│   ├── schemas.py         # Pydantic (KeyPairCreate/Out, Revoke/Rotate)
-│   ├── services.py        # Métier: create/list/stats/revoke/rotate
-│   ├── routers.py         # Routes HTTP documentées (/keys)
-│   ├── dependencies.py    # Fernet, JWT (rôles), Redis helper
-│   └── tasks.py           # Celery app (+ tâche d’exemple)
-├── migrations/            # Alembic (env.py, versions/)
-├── alembic.ini            # Configuration Alembic
-└── README.md              # Ce document
+├── app/                           # 🏠 Module principal de l'application
+│   ├── main.py                    # 🚀 Point d'entrée FastAPI, middlewares, monitoring
+│   ├── settings.py                # ⚙️ Configuration centralisée avec validation Pydantic
+│   ├── database.py                # 🗄️ Gestion des connexions DB, sessions, transactions
+│   ├── models.py                  # 📋 Modèles SQLAlchemy (KeyPair avec métadonnées)
+│   ├── schemas.py                 # 📝 Schémas Pydantic pour validation I/O
+│   ├── services.py                # 🏢 Logique métier (CRUD, statistiques, rotation)
+│   ├── routers.py                 # 🛤️ Routes HTTP avec documentation OpenAPI
+│   ├── dependencies.py            # 🔗 Injection de dépendances (JWT, Fernet, Redis)
+│   └── tasks.py                   # 🧵 Configuration Celery et tâches asynchrones
+├── migrations/                    # 📦 Migrations Alembic versionnées
+│   ├── env.py                     # 🔧 Configuration environnement Alembic
+│   └── versions/                  # 📚 Historique des migrations
+│       └── 2b2f7d15fda1_optimisations.py
+├── alembic.ini                    # ⚙️ Configuration Alembic
+├── requirements.txt               # 📦 Dépendances Python
+├── .env                          # 🔐 Variables d'environnement (non versionné)
+├── .gitignore                    # 🚫 Fichiers ignorés par Git
+└── README.md                     # 📖 Documentation complète
 ```
+
+### 🔄 Flux de Données
+
+#### 1. **Génération de Clés**
+```
+Client Request → JWT Validation → PKIService.create_key_pair() 
+→ Utils.generate_*_key_pair() → Fernet Encryption → Database Insert 
+→ Response with Public Key
+```
+
+#### 2. **Consultation de Clés**
+```
+Client Request → JWT Validation → PKIService.get_key_pair() 
+→ Database Query → Usage Count Increment → Response
+```
+
+#### 3. **Révocation de Clés**
+```
+Admin Request → Role Validation → PKIService.revoke_key() 
+→ Database Update → Audit Log → Response
+```
+
+#### 4. **Rotation de Clés**
+```
+Admin Request → Role Validation → PKIService.rotate_key() 
+→ Revoke Old + Create New → Preserve Metadata → Response
+```
+
+### 🛡️ Architecture de Sécurité
+
+#### 🔐 Chiffrement des Clés Privées
+- **Algorithme** : Fernet (AES 128 en mode CBC)
+- **Clé de chiffrement** : Partagée entre tous les services
+- **Stockage** : Encodage hexadécimal en base de données
+- **Rotation** : Possible via mise à jour de la clé Fernet
+
+#### 🔑 Authentification et Autorisation
+- **JWT Tokens** : Signature HMAC-SHA256 avec expiration
+- **Rôles** : Admin pour opérations sensibles (révocation, rotation)
+- **Validation** : Middleware de vérification sur chaque route protégée
+- **Audit** : Traçabilité des actions sensibles
+
+#### 🌐 Sécurité Web
+- **CORS** : Origines autorisées configurées
+- **TrustedHost** : Validation des hôtes autorisés
+- **HTTPS** : Chiffrement des communications (obligatoire en production)
+- **Rate Limiting** : Protection contre les attaques par déni de service
 
 ---
 
-## ⚙️ Installation & Démarrage
+## ⚙️ Installation & Configuration Complète
 
-### 📋 Prérequis
-- Python 3.10+
-- PostgreSQL 13+
-- (Optionnel) Redis si Celery utilisé
+### 📋 Prérequis Système
 
-### 🚀 Étapes
-1) Créez et activez un virtualenv, puis installez les dépendances.
-2) Créez `pki-service/.env` (voir modèle ci-dessous).
-3) Appliquez les migrations.
-4) Démarrez le service.
+#### 🐍 Environnement Python
+- **Python** : 3.10 ou supérieur (recommandé 3.11+)
+- **pip** : Gestionnaire de paquets Python
+- **virtualenv** : Environnement virtuel isolé
 
-#### `.env` minimal
+#### 🗄️ Base de Données
+- **PostgreSQL** : Version 13 ou supérieure
+- **Extensions** : Aucune extension spéciale requise
+- **Privilèges** : Utilisateur avec droits CREATE, INSERT, UPDATE, DELETE
+
+#### 🔄 Services Optionnels
+- **Redis** : Version 6.0+ (pour Celery et cache)
+- **Certificats SSL** : Pour HTTPS en production
+
+### 🚀 Installation Détaillée
+
+#### 1. **Préparation de l'Environnement**
+```bash
+# Cloner le repository (si applicable)
+git clone <repository-url>
+cd pki-service
+
+# Créer et activer l'environnement virtuel
+python -m venv venv
+
+# Windows
+venv\Scripts\activate
+
+# Linux/macOS
+source venv/bin/activate
+```
+
+#### 2. **Installation des Dépendances**
+```bash
+# Installation des dépendances principales
+pip install -r requirements.txt
+
+# Vérification de l'installation
+pip list | grep -E "(fastapi|sqlalchemy|alembic|cryptography)"
+```
+
+#### 3. **Configuration de l'Environnement**
+
+Créez le fichier `.env` dans le répertoire `pki-service/` :
+
 ```env
-DATABASE_URL=postgresql+asyncpg://user:password@localhost:5432/pki_db
+# ===========================================
+# CONFIGURATION PKI SERVICE
+# ===========================================
+
+# Application
+APP_NAME=PKI Service
+APP_VERSION=1.0.0
+ENVIRONMENT=development
+DEBUG=false
+LOG_LEVEL=INFO
+
+# Base de données PostgreSQL
+DATABASE_URL=postgresql+asyncpg://pki_user:secure_password@localhost:5432/pki_db
+DB_POOL_SIZE=10
+DB_MAX_OVERFLOW=20
+DB_POOL_TIMEOUT=30
+DB_POOL_RECYCLE=3600
+
+# Redis (optionnel - pour Celery et cache)
 REDIS_HOST=localhost
 REDIS_PORT=6379
 REDIS_DB=0
 REDIS_PASSWORD=
-JWT_SECRET=change-this-very-long-secret-at-least-32-chars
+REDIS_URL=redis://localhost:6379/0
+
+# Sécurité JWT
+JWT_SECRET=your-super-secret-jwt-key-at-least-32-characters-long
+JWT_ALGORITHM=HS256
+JWT_ACCESS_TOKEN_EXPIRE_MINUTES=60
+JWT_REFRESH_TOKEN_EXPIRE_DAYS=7
+
+# Chiffrement Fernet (CRITIQUE - doit être identique dans tous les services)
 FERNET_KEY=PASTE_GENERATED_FERNET_KEY_HERE
-ALLOWED_ORIGINS=https://localhost:3000,https://127.0.0.1:3000
-LOG_LEVEL=WARNING
+
+# CORS et Sécurité
+ALLOWED_ORIGINS=https://localhost:3000,https://127.0.0.1:3000,https://angara.vertex-cam.com
+ALLOWED_HOSTS=localhost,127.0.0.1,*.angara.vertex-cam.com
+
+# Limites et Contraintes
+MAX_KEY_LIFETIME_DAYS=365
+MIN_KEY_LIFETIME_DAYS=1
+DEFAULT_KEY_LIFETIME_DAYS=365
+
+# Monitoring et Observabilité
+ENABLE_METRICS=true
+METRICS_PATH=/metrics
+HEALTH_CHECK_PATH=/health
+READINESS_CHECK_PATH=/ready
+
+# Celery (optionnel)
+CELERY_BROKER_URL=redis://localhost:6379/1
+CELERY_RESULT_BACKEND=redis://localhost:6379/1
+CELERY_TASK_SERIALIZER=json
+CELERY_RESULT_SERIALIZER=json
+CELERY_ACCEPT_CONTENT=["json"]
 ```
-Générez une FERNET_KEY à la racine du repo:
+
+#### 4. **Génération de la Clé Fernet**
+
+⚠️ **CRITIQUE** : La clé Fernet doit être identique dans tous les services !
+
 ```bash
+# Générer une nouvelle clé Fernet
 python F:\Schools\generate_fernet_key.py
-```
-Copiez la valeur dans le `.env` de chaque service, puis supprimez `fernet_key.txt`.
 
-#### Migrations (Alembic)
+# Copier la clé générée dans fernet_key.txt vers tous les .env
+# Puis SUPPRIMER fernet_key.txt pour des raisons de sécurité
+```
+
+#### 5. **Configuration de la Base de Données**
+
 ```bash
+# Créer la base de données PostgreSQL
+createdb -U postgres pki_db
+
+# Créer l'utilisateur (optionnel)
+psql -U postgres -c "CREATE USER pki_user WITH PASSWORD 'secure_password';"
+psql -U postgres -c "GRANT ALL PRIVILEGES ON DATABASE pki_db TO pki_user;"
+```
+
+#### 6. **Migrations Alembic**
+
+```bash
+# Activer l'environnement virtuel
+# Windows
+venv\Scripts\activate
+
+# Linux/macOS
+source venv/bin/activate
+
+# Naviguer vers le répertoire du service
 cd F:\Schools\pki-service
-. .\venv\Scripts\Activate.ps1
-alembic revision --autogenerate -m "initial"
+
+# Générer la migration initiale
+alembic revision --autogenerate -m "Initial migration - KeyPair table"
+
+# Appliquer les migrations
 alembic upgrade head
+
+# Vérifier le statut
+alembic current
+alembic history
 ```
 
-#### Lancer le service
+#### 7. **Démarrage du Service**
+
+##### Mode Développement (HTTP)
 ```bash
-uvicorn app.main:app --host 0.0.0.0 --port 8001 \
+uvicorn app.main:app --host 0.0.0.0 --port 8001 --reload
+```
+
+##### Mode Production (HTTPS)
+```bash
+uvicorn app.main:app \
+  --host 0.0.0.0 \
+  --port 8001 \
   --ssl-keyfile F:\Schools\certs\key.pem \
-  --ssl-certfile F:\Schools\certs\cert.pem
+  --ssl-certfile F:\Schools\certs\cert.pem \
+  --workers 4
+```
+
+##### Avec Docker (Recommandé)
+```bash
+# Construire l'image
+docker build -t pki-service .
+
+# Lancer le conteneur
+docker run -d \
+  --name pki-service \
+  -p 8001:8001 \
+  --env-file .env \
+  pki-service
+```
+
+### 🔍 Vérification de l'Installation
+
+#### 1. **Tests de Connectivité**
+```bash
+# Vérifier la santé du service
+curl -k https://localhost:8001/health
+
+# Vérifier la préparation
+curl -k https://localhost:8001/ready
+
+# Vérifier les métriques
+curl -k https://localhost:8001/metrics
+```
+
+#### 2. **Tests d'API**
+```bash
+# Accéder à la documentation Swagger
+# https://localhost:8001/docs
+
+# Test d'authentification (si configuré)
+curl -X POST https://localhost:8001/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username": "admin", "password": "password"}'
+```
+
+#### 3. **Vérification de la Base de Données**
+```bash
+# Se connecter à PostgreSQL
+psql -U pki_user -d pki_db
+
+# Vérifier les tables
+\dt
+
+# Vérifier la structure de la table key_pairs
+\d key_pairs
 ```
 
 ---
