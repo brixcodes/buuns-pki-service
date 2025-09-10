@@ -5,7 +5,7 @@ Inclut l'initialisation Fernet (depuis settings) et l'authentification JWT.
 
 from cryptography.fernet import Fernet
 import logging
-from app.settings import settings
+from app.helper.settings import settings
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +30,7 @@ def decrypt_private_key(token: bytes) -> bytes:
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
-from app.settings import settings
+from app.helper.settings import settings
 import redis.asyncio as redis
 import logging
 from typing import AsyncGenerator, Optional

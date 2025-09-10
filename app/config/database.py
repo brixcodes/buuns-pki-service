@@ -8,14 +8,11 @@ from typing import AsyncGenerator, Optional
 from contextlib import asynccontextmanager
 from sqlalchemy.ext.asyncio import (
     AsyncEngine, AsyncSession, create_async_engine, 
-    async_sessionmaker, AsyncConnection
+    async_sessionmaker
 )
-from sqlalchemy.orm import sessionmaker
 from sqlalchemy import text, event
-from sqlalchemy.exc import SQLAlchemyError, DisconnectionError
-from app.settings import settings
-import asyncio
-import time
+from sqlalchemy.exc import SQLAlchemyError
+from app.helper.settings import settings
 
 # Configuration du logging
 logger = logging.getLogger(__name__)

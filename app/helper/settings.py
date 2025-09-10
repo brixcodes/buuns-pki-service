@@ -9,16 +9,22 @@ from typing import Optional, List
 from pydantic import field_validator, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from dotenv import load_dotenv
-from os import getenv
 import re
 
 # Configuration du logging
 logger = logging.getLogger(__name__)
 
 # Chargement du fichier .env
-BASE_DIR = Path(__file__).resolve().parent.parent
-env_file_path = BASE_DIR / ".env"
-load_dotenv(env_file_path)
+# Recherche prioritaire: racine du projet puis dossier app/
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+APP_DIR = Path(__file__).resolve().parent.parent
+_env_candidates = [
+    PROJECT_ROOT / ".env",
+    APP_DIR / ".env",
+]
+ENV_FILE_PATH = next((p for p in _env_candidates if p.exists()), _env_candidates[0])
+load_dotenv(ENV_FILE_PATH)
+logger.info(f"Fichier .env chargé depuis: {ENV_FILE_PATH}")
 
 class Settings(BaseSettings):
     """
@@ -127,7 +133,7 @@ class Settings(BaseSettings):
     
     # ==================== CONFIGURATION PYDANTIC ====================
     model_config = SettingsConfigDict(
-        env_file=env_file_path,
+        env_file=ENV_FILE_PATH,
         env_file_encoding="utf-8",
         case_sensitive=False,
         validate_assignment=True,

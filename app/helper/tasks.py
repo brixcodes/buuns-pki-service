@@ -4,7 +4,7 @@ Configure le broker/backend Redis et expose une instance de Celery prête.
 """
 
 from celery import Celery
-from app.settings import settings
+from app.helper.settings import settings
 
 
 def build_redis_url() -> str:

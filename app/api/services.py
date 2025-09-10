@@ -11,13 +11,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy import and_, or_, func, desc, asc
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
-from app.models import KeyPair
-from app.utils import (
-    generate_ml_dsa_keys, validate_public_key, validate_private_key,
-    generate_key_fingerprint, get_supported_key_types, estimate_key_generation_time
+from app.api.models import KeyPair
+from app.helper.utils import (
+    generate_ml_dsa_keys, validate_public_key, 
+    validate_private_key, get_supported_key_types
 )
-from app.dependencies import encrypt_private_key, decrypt_private_key
-from app.settings import settings
+from app.config.dependencies import encrypt_private_key, decrypt_private_key
+from app.helper.settings import settings
 from fastapi import HTTPException, status
 import logging
 

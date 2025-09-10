@@ -23,12 +23,12 @@ from fastapi.responses import PlainTextResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
-from app.routers import router
-from app.database import engine, check_database_connection
-from app.models import Base
+from app.api.routers import router
+from app.config.database import engine, check_database_connection
+from app.api.models import Base
 import logging
 import uuid
-from app.settings import settings
+from app.helper.settings import settings
 
 # Configuration de l'application
 DESCRIPTION = """

@@ -3,11 +3,11 @@ Routes HTTP du PKI Service
 Expose des endpoints documentés pour gérer les paires de clés.
 """
 
-from fastapi import APIRouter, Depends, HTTPException, status
-from app.schemas import KeyPairCreate, KeyPairOut, RevokeRequest, RotateRequest
-from app.services import PKIService
-from app.dependencies import get_current_user
-from app.database import get_db
+from fastapi import APIRouter, Depends, status
+from app.api.schemas import KeyPairCreate, KeyPairOut, RevokeRequest, RotateRequest
+from app.api.services import PKIService
+from app.config.dependencies import get_current_user
+from app.config.database import get_db
 from sqlalchemy.ext.asyncio import AsyncSession
 
 router = APIRouter(prefix="/keys", tags=["keys"])
