@@ -25,7 +25,6 @@ from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from app.api.routers import router
 from app.config.database import engine, check_database_connection
-from app.api.models import Base
 import logging
 import uuid
 from app.helper.settings import settings
@@ -96,6 +95,8 @@ app.add_middleware(
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["Authorization", "Content-Type", "X-Trace-ID", "X-Request-ID"]
 )
+ 
+
 
 @app.on_event("startup")
 async def startup_event():
@@ -110,11 +111,7 @@ async def startup_event():
     """
     logger.info("Démarrage du service PKI...")
     try:
-        # Initialisation de la base de données (création des tables si elles n'existent pas)
-        async with engine.begin() as conn:
-            await conn.run_sync(Base.metadata.create_all)
-        logger.info("Tables de la base de données créées/vérifiées avec succès.")
-        
+        # Les migrations Alembic doivent gérer le schéma. On vérifie juste la connectivité.
         # Vérification de la connexion à la base de données
         if not await check_database_connection():
             raise ConnectionError("La connexion à la base de données a échoué au démarrage.")

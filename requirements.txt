@@ -10,5 +10,5 @@ python-dotenv==1.0.1
 alembic==1.13.2
 structlog==24.4.0
 pycryptodome==3.23.0
-python-jose
-celery[redis]
+python-jose==3.5.0
+celery[redis]==5.4.0

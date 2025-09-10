@@ -54,7 +54,7 @@ class Settings(BaseSettings):
     DATABASE_URL: str = Field(
         ...,
         description="URL de connexion à la base de données PostgreSQL",
-        examples=["postgresql+asyncpg://user:password@localhost:5432/pki_db"]
+        examples=["postgresql+asyncpg://user:password@localhost:5432/pki_buuns"]
     )
     
     # ==================== REDIS ====================
@@ -80,22 +80,22 @@ class Settings(BaseSettings):
     )
     
     # ==================== SÉCURITÉ ====================
-    HSM_DEVICE: str = Field(
-        ...,
-        description="Chemin vers le périphérique HSM",
-        examples=["/dev/hsm", "\\\\.\\HSM"]
+    HSM_DEVICE: Optional[str] = Field(
+        default=None,
+        description="Chemin vers le périphérique HSM (optionnel)",
+        examples=["/dev/hsm", "\\.\\HSM"]
     )
-    HSM_PIN: str = Field(
-        ...,
+    HSM_PIN: Optional[str] = Field(
+        default=None,
         min_length=4,
         max_length=32,
-        description="PIN pour accéder au HSM"
+        description="PIN pour accéder au HSM (optionnel)"
     )
-    HSM_KEY_HANDLE: int = Field(
-        default=1,
+    HSM_KEY_HANDLE: Optional[int] = Field(
+        default=None,
         ge=1,
         le=65535,
-        description="Handle de la clé dans le HSM"
+        description="Handle de la clé dans le HSM (optionnel)"
     )
     JWT_SECRET: str = Field(
         ...,
@@ -118,6 +118,18 @@ class Settings(BaseSettings):
         default="WARNING",
         description="Niveau de logging"
     )
+    APP_NAME: str = Field(
+        default="PKI Service",
+        description="Nom de l'application (ignoré si non utilisé)"
+    )
+    APP_VERSION: str = Field(
+        default="1.0.0",
+        description="Version de l'application (ignorée si non utilisée)"
+    )
+    JWT_ALGORITHM: str = Field(
+        default="HS256",
+        description="Algorithme JWT (par défaut HS256)"
+    )
     MAX_KEY_LIFETIME_DAYS: int = Field(
         default=365,
         ge=1,
@@ -130,6 +142,10 @@ class Settings(BaseSettings):
         le=90,
         description="Seuil de rotation automatique des clés en jours"
     )
+
+    # ==================== DEV AUTH (OPTIONNEL) ====================
+    DEV_USER: Optional[str] = Field(default="admin", description="Utilisateur dev pour /auth/token")
+    DEV_PASSWORD: Optional[str] = Field(default="admin", description="Mot de passe dev pour /auth/token")
     
     # ==================== CONFIGURATION PYDANTIC ====================
     model_config = SettingsConfigDict(
@@ -137,7 +153,7 @@ class Settings(BaseSettings):
         env_file_encoding="utf-8",
         case_sensitive=False,
         validate_assignment=True,
-        extra="forbid"
+        extra="ignore"
     )
     
     # ==================== VALIDATEURS ====================
@@ -192,6 +208,9 @@ class Settings(BaseSettings):
             - Alternatif: Paramètre manquant ou trop court
         """
         field_name = getattr(info, "field_name", None)
+        # HSM configs are optional now
+        if field_name in ("HSM_DEVICE", "HSM_PIN"):
+            return value
         if not value:
             logger.error(f"Paramètre de sécurité manquant: {field_name}")
             raise ValueError(f"{field_name} doit être défini pour la sécurité")
@@ -295,7 +314,7 @@ try:
     logger.info("Configuration PKI Service chargée avec succès")
     logger.info(f"Base de données: {settings.DATABASE_URL.split('@')[1] if '@' in settings.DATABASE_URL else 'configurée'}")
     logger.info(f"Redis: {settings.REDIS_HOST}:{settings.REDIS_PORT}")
-    logger.info(f"HSM: {settings.HSM_DEVICE}")
+    logger.info(f"HSM: {'configuré' if settings.HSM_DEVICE else 'désactivé'}")
     logger.info(f"Origines CORS: {len(settings.get_allowed_origins_list())} origine(s)")
 except Exception as e:
     logger.error(f"Erreur lors du chargement de la configuration: {str(e)}")

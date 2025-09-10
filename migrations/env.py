@@ -8,8 +8,8 @@ from sqlalchemy import pool
 from sqlalchemy.ext.asyncio import create_async_engine
 from dotenv import load_dotenv
 
-from app.settings import settings
-from app.models import Base, KeyPair
+from app.helper.settings import settings
+from app.api.models import Base, KeyPair
 target_metadata = Base.metadata
 
 

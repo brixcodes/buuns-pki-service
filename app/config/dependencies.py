@@ -39,7 +39,7 @@ import asyncio
 
 logger = logging.getLogger(__name__)
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token")
 
 async def get_redis() -> AsyncGenerator[redis.Redis, None]:
     max_retries = 3
@@ -75,7 +75,7 @@ def get_current_user(required_role: Optional[str] = None):
             payload = jwt.decode(
                 token,
                 settings.JWT_SECRET,
-                algorithms=["HS256"]
+                algorithms=[settings.JWT_ALGORITHM]
             )
             user = payload.get("sub")
             roles = payload.get("roles", [])
